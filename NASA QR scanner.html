@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+</head>
+
+<h1 style="display:flex;justify-content: center;">NASA Space Apps Cairo 2022</h1>
+
+<body style=" margin:auto;position: absolute;left: 50%;transform: translate(-250px, 25%);
+">
+
+    <div id="qr-reader" style="width:500px; height: 450px;"></div>
+    <script>
+        var resultContainer = document.getElementById('qr-reader-results');
+
+        // when scanning a QR code
+        function onScanSuccess(decodedText, decodedResult) {
+            // get the name of the owner of the QR code to display
+            window.alert("Got the code click OK to porceed!")
+            var mealNumber = decodedText[0];
+            var extractedQRData = decodedText.slice(1);
+
+            // google.script.run.getNameForHTML(extractedQRData);
+            // google.script.run.withsu getNameForHTML(extractedQRData);
+            google.script.run.withSuccessHandler(data => {
+                var name = data;
+                google.script.run.withSuccessHandler(usageData => {
+                    let usedQRCode = usageData;
+                    if (usedQRCode == -1) alert("There is no volunteer for this QR code!")
+                    else if (usedQRCode == 0) {
+                        // pop up a confirmation window
+                        var val = confirm("Are they " + name + "?");
+                        if (val == true) {
+                            // register the QR code on the sheet 
+                            google.script.run.registerFromHTML(name, mealNumber);
+                            alert("Registered!");
+                        } else {
+                            alert("Cancelled!");
+                        }
+                    }
+                    else {
+                        alert("This meal for today has been already taken by " + name + " at " + usageData + "!")
+                    }
+                }).ifUsed(mealNumber + name);
+            }).getNameForHTML(extractedQRData);
+            // window.alert(decodedText);
+            // google.script.run.getQRCode(decodedText);
+            // google.script.host.close();
+        }
+        function getName(n) { name = n; window.alert("Name is " + name); }
+        var html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", { fps: 25, qrbox: 300 });
+        html5QrcodeScanner.render(onScanSuccess);
+    </script>
+</body>
+
+
+
+</html>
